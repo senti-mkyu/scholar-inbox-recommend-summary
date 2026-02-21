@@ -93,19 +93,24 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 def get_gmail_service():
     creds = None
     # token.json은 사용자의 인증 정보를 저장합니다.
-    try:
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    except:
-        pass
+    if os.environ.get('GMAIL_TOKEN'):
+        import json
+        token_data = json.loads(os.environ.get('GMAIL_TOKEN'))
+        creds = Credentials.from_authorized_user_info(token_data, SCOPES)
 
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+    # try:
+    #     creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    # except:
+    #     pass
+
+    # if not creds or not creds.valid:
+    #     if creds and creds.expired and creds.refresh_token:
+    #         creds.refresh(Request())
+    #     else:
+    #         flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+    #         creds = flow.run_local_server(port=0)
+    #     with open('token.json', 'w') as token:
+    #         token.write(creds.to_json())
     
     return build('gmail', 'v1', credentials=creds)
 
@@ -397,7 +402,7 @@ def main(y=None, m=None, d=None):
 
     login_url = fetch_sha_key(key)
     if not login_url:
-        return None
+        return False
 
     
     img_dir = f"images/{today}"
@@ -422,8 +427,12 @@ def main(y=None, m=None, d=None):
             data = process_arxiv_page(page, link, img_dir)
             save_report_to_markdown(md_fp, data)
         browser.close()
+    return True
     
 
 if __name__ == "__main__":
-    # main(y=2026, m=2, d=20)
-    update_main_readme()
+    result = main()
+    if result:
+        update_main_readme()
+    else:
+        print("No Paper Today.")
