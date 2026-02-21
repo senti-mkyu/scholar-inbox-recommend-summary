@@ -1,0 +1,50 @@
+name: Daily ArXiv Summary Bot
+
+on:
+  schedule:
+    - cron: '0 12 * * *' # 매일 한국 시간 오 9시 실행
+  workflow_dispatch: # 필요할 때 버튼 눌러서 즉시 실행 가능
+
+# 파일 쓰기 권한 설정
+permissions:
+  contents: write
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libnspr4 libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2
+          pip install google-genai pydantic beautifulsoup4 requests playwright
+          playwright install-deps
+          playwright install chromium
+          pip install pandas bs4
+          pip install google-api-python-client google-auth-oauthlib
+
+
+      - name: Run Scholar Bot
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GMAIL_TOKEN: ${{ secrets.GMAIL_TOKEN }} # 추가됨
+        run: python bot.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 새 리포트, 이미지, 업데이트된 README 모두 추가
+          git add .
+          
+          # 변경 사항이 있는 경우에만 커밋 및 푸시
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🚀 Update: Daily Paper Summary $(date +'%Y-%m-%d')" && git push)
