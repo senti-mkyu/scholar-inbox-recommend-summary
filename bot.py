@@ -119,17 +119,23 @@ def fetch_sha_key(target_date=None):
     
     # 날짜 지정 (기본값은 오늘)
     if target_date is None:
-        target_date = datetime.date.today().strftime('%Y/%m/%d')
+        target_date = datetime.date.today()
+
+    # Gmail 쿼리 형식: YYYY/MM/DD
+    # 오늘 하루의 메일을 다 잡기 위해 '어제 이후 ~ 내일 이전'으로 설정
+    after_date = (target_date).strftime('%Y/%m/%d')
+    before_date = (target_date + datetime.timedelta(days=1)).strftime('%Y/%m/%d')
+    
     
     # Gmail 쿼리: 발신자와 날짜 기준 필터링
-    query = f"from:noreply@cvlibs.net after:{target_date}"
+    query = f"from:Scholar Inbox after:{after_date} before:{before_date}"
     print(f"검색 쿼리: {query}")
     
     results = service.users().messages().list(userId='me', q=query).execute()
     messages = results.get('messages', [])
 
     if not messages:
-        print(f"{target_date} 이후에 수신된 Scholar Inbox 메일이 없습니다.")
+        print(f"{target_date} 에 수신된 Scholar Inbox 메일이 없습니다.")
         return None
 
     for msg in messages:
@@ -395,7 +401,7 @@ def main(y=None, m=None, d=None):
     # 특정 날짜를 지정하고 싶다면: fetch_sha_key('2026/02/20')
     if exists(y) and exists(m) and exists(d):
         today = f"{y}-{m:02d}-{d:02d}"
-        key = f"{y}/{m:02d}/{d:02d}"
+        key = datetime.date(year=y, month=m, day=d) 
     else:
         today = datetime.date.today().strftime('%Y-%m-%d')
         key = None
@@ -425,12 +431,28 @@ def main(y=None, m=None, d=None):
         
         for link in arxiv_links:
             data = process_arxiv_page(page, link, img_dir)
+            if not exists(data):
+                continue
             save_report_to_markdown(md_fp, data)
         browser.close()
     return True
     
 
 if __name__ == "__main__":
+    # start_date_str = '2026-02-19'
+    # end_date_str = '2026-02-19'
+    # start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+    # end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+
+    # current_date = start_date
+    # while current_date <= end_date:
+    #     y = current_date.year
+    #     m = current_date.month
+    #     d = current_date.day
+    #     current_date += datetime.timedelta(days=1)
+
+    #     result = main(y=y, m=m, d=d)
+
     result = main()
     if result:
         update_main_readme()
