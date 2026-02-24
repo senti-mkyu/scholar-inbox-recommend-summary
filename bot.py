@@ -328,6 +328,7 @@ def save_report_to_markdown(file_name, data):
 
     if not report_obj:
         report_obj = PaperReport(
+            title=data['title'],
             abstract_org="Gemini API Call에 실패했습니다. 직접 들어가서 읽으세요 ㅠㅠ",
             abstract_ko="Gemini API Call에 실패했습니다. 직접 들어가서 읽으세요 ㅠㅠ",
             methods_results=["Gemini API Call에 실패했습니다. 직접 들어가서 읽으세요 ㅠㅠ"],
@@ -439,8 +440,8 @@ def main(y=None, m=None, d=None):
     
 
 if __name__ == "__main__":
-    # start_date_str = '2026-02-19'
-    # end_date_str = '2026-02-19'
+    # start_date_str = '2026-01-16'
+    # end_date_str = '2026-01-31'
     # start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
     # end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
 
