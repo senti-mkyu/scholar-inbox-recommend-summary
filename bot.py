@@ -179,17 +179,20 @@ def download_images(page, base_url, img_dir):
     downloaded_paths = []
     # ltx_figure 클래스를 가진 모든 요소를 찾음
     figures = page.query_selector_all("figure.ltx_figure")
+    paper_id = base_url.split("/")[-1]
+    base_url = "/".join(base_url.split("/")[:-1])
+
     for idx, fig in enumerate(figures):
         img_tag = fig.query_selector("img.ltx_graphics")
         if not img_tag: continue
-        
+
         src = img_tag.get_attribute("src") # 예: x1.png
         full_img_url = base_url + '/' + src
         
         caption_tag = fig.query_selector("figcaption")
         caption = caption_tag.inner_text() if caption_tag else f"Figure {idx+1}"
         
-        img_filename = f"{base_url.split('/')[-1]}_fig{idx}.png"
+        img_filename = f"{paper_id}_fig{idx}.png"
         save_path = os.path.join(img_dir, img_filename)
         
         try:
