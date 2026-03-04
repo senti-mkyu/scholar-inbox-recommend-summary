@@ -16,10 +16,6 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
-# 환경 변수 설정
-api_key=os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key)
-
 def exists(v):
     if v is not None:
         return True
@@ -249,6 +245,7 @@ class PaperReport(BaseModel):
 
 def summarize_paper_with_gemini(abstract, sections, max_retries=5):
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    model_name = os.getenv("GEMINI_MODEL_NAME")
     
     # 본문 데이터 구성 (추출된 섹션들을 하나의 문자열로 결합)
     method_context = "\n\n".join([f"[{title}]\n{content}" for title, content in sections.items()])
@@ -269,7 +266,7 @@ def summarize_paper_with_gemini(abstract, sections, max_retries=5):
     for i in range(max_retries):
         try:
             response = client.models.generate_content(
-                model='gemini-3-flash-preview',
+                model=model_name,
                 contents=user_prompt,
                 config={
                     'response_mime_type': 'application/json',
@@ -443,8 +440,8 @@ def main(y=None, m=None, d=None):
     
 
 if __name__ == "__main__":
-    # start_date_str = '2026-01-16'
-    # end_date_str = '2026-01-31'
+    # start_date_str = '2026-03-03'
+    # end_date_str = '2026-03-04'
     # start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
     # end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
 
