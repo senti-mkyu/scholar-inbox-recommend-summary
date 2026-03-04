@@ -246,6 +246,7 @@ class PaperReport(BaseModel):
 def summarize_paper_with_gemini(abstract, sections, max_retries=5):
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
     model_name = os.getenv("GEMINI_MODEL_NAME")
+    print(f"✉️ Use model: {model_name}")
     
     # 본문 데이터 구성 (추출된 섹션들을 하나의 문자열로 결합)
     method_context = "\n\n".join([f"[{title}]\n{content}" for title, content in sections.items()])
