@@ -34,6 +34,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GMAIL_TOKEN: ${{ secrets.GMAIL_TOKEN }} # 추가됨
+          GEMINI_MODEL_NAME: ${{ secrets.GEMINI_MODEL_NAME }}
         run: python bot.py
 
       - name: Commit and Push changes
