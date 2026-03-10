@@ -89,24 +89,24 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 def get_gmail_service():
     creds = None
     # token.json은 사용자의 인증 정보를 저장합니다.
-    if os.environ.get('GMAIL_TOKEN'):
-        import json
-        token_data = json.loads(os.environ.get('GMAIL_TOKEN'))
-        creds = Credentials.from_authorized_user_info(token_data, SCOPES)
+    # if os.environ.get('GMAIL_TOKEN'):
+    #     import json
+    #     token_data = json.loads(os.environ.get('GMAIL_TOKEN'))
+    #     creds = Credentials.from_authorized_user_info(token_data, SCOPES)
 
-    # try:
-    #     creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    # except:
-    #     pass
+    try:
+        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    except:
+        pass
 
-    # if not creds or not creds.valid:
-    #     if creds and creds.expired and creds.refresh_token:
-    #         creds.refresh(Request())
-    #     else:
-    #         flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-    #         creds = flow.run_local_server(port=0)
-    #     with open('token.json', 'w') as token:
-    #         token.write(creds.to_json())
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+            creds = flow.run_local_server(port=0)
+        with open('token.json', 'w') as token:
+            token.write(creds.to_json())
     
     return build('gmail', 'v1', credentials=creds)
 
@@ -207,7 +207,7 @@ def parse_arxiv_html(html_content):
     
     # 1. 초록(Abstract) 추출
     # ArXiv HTML은 보통 <section id="S1"> 또는 .ltx_abstract에 초록이 담깁니다.
-    abstract_section = soup.find('section', id='S1') or soup.select_one('.ltx_abstract')
+    abstract_section = soup.select_one('.ltx_abstract') or soup.find('section', id='S1')
     abstract_text = ""
     if abstract_section:
         # 제목 제외하고 본문 문단만 추출
