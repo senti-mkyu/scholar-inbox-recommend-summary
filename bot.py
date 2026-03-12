@@ -89,24 +89,24 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 def get_gmail_service():
     creds = None
     # token.json은 사용자의 인증 정보를 저장합니다.
-    # if os.environ.get('GMAIL_TOKEN'):
-    #     import json
-    #     token_data = json.loads(os.environ.get('GMAIL_TOKEN'))
-    #     creds = Credentials.from_authorized_user_info(token_data, SCOPES)
+    if os.environ.get('GMAIL_TOKEN'):
+        import json
+        token_data = json.loads(os.environ.get('GMAIL_TOKEN'))
+        creds = Credentials.from_authorized_user_info(token_data, SCOPES)
 
-    try:
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    except:
-        pass
+    # try:
+    #     creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    # except:
+    #     pass
 
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+    # if not creds or not creds.valid:
+    #     if creds and creds.expired and creds.refresh_token:
+    #         creds.refresh(Request())
+    #     else:
+    #         flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+    #         creds = flow.run_local_server(port=0)
+    #     with open('token.json', 'w') as token:
+    #         token.write(creds.to_json())
     
     return build('gmail', 'v1', credentials=creds)
 
