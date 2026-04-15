@@ -2,7 +2,7 @@ name: Daily ArXiv Summary Bot
 
 on:
   schedule:
-    - cron: '0 12 * * *' # 매일 한국 시간 오 9시 실행
+    - cron: '0 14 * * *' # 매일 한국 시간 오 9시 실행
   workflow_dispatch: # 필요할 때 버튼 눌러서 즉시 실행 가능
 
 # 파일 쓰기 권한 설정
