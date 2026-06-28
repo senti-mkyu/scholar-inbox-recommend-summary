@@ -117,18 +117,27 @@ def fetch_sha_key(target_date=None):
     if target_date is None:
         target_date = datetime.date.today()
 
-    # Gmail 쿼리 형식: YYYY/MM/DD
-    # 오늘 하루의 메일을 다 잡기 위해 '어제 이후 ~ 내일 이전'으로 설정
-    after_date = (target_date).strftime('%Y/%m/%d')
-    before_date = (target_date + datetime.timedelta(days=1)).strftime('%Y/%m/%d')
-    
-    
-    # Gmail 쿼리: 발신자와 날짜 기준 필터링
-    query = f"from:Scholar Inbox after:{after_date} before:{before_date}"
+    # import datetime
+
+    # target_date가 datetime.date 객체라고 가정합니다.
+    # 한국 시간(KST, UTC+9) 타임존 설정
+    tz_kst = datetime.timezone(datetime.timedelta(hours=9))
+
+    # 한국 시간 기준 당일 시작 시각과 종료 시각 설정
+    start_of_day = datetime.datetime.combine(target_date, datetime.time.min, tzinfo=tz_kst)
+    end_of_day = datetime.datetime.combine(target_date, datetime.time.max, tzinfo=tz_kst)
+
+    # 초 단위 Unix 타임스탬프로 변환
+    after_timestamp = int(start_of_day.timestamp())
+    before_timestamp = int(end_of_day.timestamp())
+
+    # 발신자 이름은 큰따옴표(")로 감싸서 정확한 이름을 매칭하도록 수정
+    query = f'from:"Scholar Inbox" after:{after_timestamp} before:{before_timestamp}'
     print(f"검색 쿼리: {query}")
-    
+
     results = service.users().messages().list(userId='me', q=query).execute()
     messages = results.get('messages', [])
+
 
     if not messages:
         print(f"{target_date} 에 수신된 Scholar Inbox 메일이 없습니다.")
