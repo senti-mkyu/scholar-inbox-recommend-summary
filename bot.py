@@ -119,20 +119,17 @@ def fetch_sha_key(target_date=None):
 
     # import datetime
 
-    # target_date가 datetime.date 객체라고 가정합니다.
-    # 한국 시간(KST, UTC+9) 타임존 설정
-    tz_kst = datetime.timezone(datetime.timedelta(hours=9))
+    # 1. 미국 시차(PDT) 오류를 방지하기 위해 검색 범위를 하루 전 ~ 이틀 후로 확장
+    # (타겟 날짜가 6월 29일이라면 after는 28일, before는 7월 1일로 설정됨)
+    after_date = (target_date - datetime.timedelta(days=1)).strftime('%Y/%m/%d')
+    before_date = (target_date + datetime.timedelta(days=2)).strftime('%Y/%m/%d')
 
-    # 한국 시간 기준 당일 시작 시각과 종료 시각 설정
-    start_of_day = datetime.datetime.combine(target_date, datetime.time.min, tzinfo=tz_kst)
-    end_of_day = datetime.datetime.combine(target_date, datetime.time.max, tzinfo=tz_kst)
+    # 2. 발신자 필터는 '이름' 대신 실제 이메일 주소 형식을 권장합니다.
+    # (예: digest@scholarinbox.com 처럼 실제 수신된 메일의 상세 주소 확인 필요)
+    sender_email="noreply@cvlibs.net"
 
-    # 초 단위 Unix 타임스탬프로 변환
-    after_timestamp = int(start_of_day.timestamp())
-    before_timestamp = int(end_of_day.timestamp())
+    query = f"from:{sender_email} after:{after_date} before:{before_date}"
 
-    # 발신자 이름은 큰따옴표(")로 감싸서 정확한 이름을 매칭하도록 수정
-    query = f'from:"Scholar Inbox" after:{after_timestamp} before:{before_timestamp}'
     print(f"검색 쿼리: {query}")
 
     results = service.users().messages().list(userId='me', q=query).execute()
